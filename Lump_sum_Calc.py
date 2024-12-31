@@ -1,82 +1,75 @@
+import streamlit as st
+import pandas as pd
 import matplotlib.pyplot as plt
 
-def sip_calculator_with_graph(
-    lump_sum,
-    monthly_contribution,
-    annual_rate,
-    total_years,
-    stop_contribution_years,
-    currency_code='USD'
-):
-    currency_symbols = {
-        'USD': '$',
-        'INR': '₹',
-        'EUR': '€',
-        'GBP': '£',
-        'JPY': '¥',
-    }
-    currency_symbol = currency_symbols.get(currency_code.upper(), '$')
+# SIP Calculator Function
+def sip_calculator(lump_sum, monthly_contribution, annual_rate, total_years, stop_contribution_years):
     r = annual_rate / 100
     n = 12
     total_months = total_years * 12
     sip_stop_months = stop_contribution_years * 12
-
-    # Precompute common factor
-    monthly_rate = 1 + r / n
-    months = []
-    values = []
-
-    # Initialize values
     current_value = lump_sum
     total_invested = lump_sum
-    months.append(0)
-    values.append(current_value)
+    growth = []
 
-    # Efficient compounding using formula
     for month in range(1, total_months + 1):
         if month <= sip_stop_months:
-            current_value = current_value * monthly_rate + monthly_contribution
+            current_value = current_value * (1 + r / n) + monthly_contribution
             total_invested += monthly_contribution
         else:
-            current_value *= monthly_rate
-
+            current_value *= (1 + r / n)
         if month % 12 == 0 or month == total_months:
-            months.append(month)
-            values.append(current_value)
+            growth.append((month / 12, current_value))
+    
+    profit = current_value - total_invested
+    return current_value, total_invested, profit, pd.DataFrame(growth, columns=["Year", "Investment Value"])
 
-    final_value = current_value
-    profit = final_value - total_invested
+# Streamlit App UI
+st.set_page_config(page_title="SIP & Lump Sum Calculator", layout="wide")
+st.title("📈 SIP & Lump Sum Investment Calculator")
 
-    # Plot the graph
-    plt.figure(figsize=(10, 6))
-    plt.plot(months, values, label='Investment Value', marker='o')
-    plt.xlabel('Months')
-    plt.ylabel('Investment Value')
-    plt.title('Growth of Investment Over Time')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+# Sidebar Inputs
+with st.sidebar:
+    st.header("Input Parameters")
+    lump_sum = st.number_input("💵 Lump Sum Investment", value=10000.0, min_value=0.0)
+    monthly_contribution = st.number_input("📅 Monthly Contribution", value=500.0, min_value=0.0)
+    annual_rate = st.slider("📊 Annual Interest Rate (%)", min_value=0.0, max_value=20.0, value=10.0, step=0.1)
+    total_years = st.slider("⏳ Total Investment Period (Years)", min_value=1, max_value=30, value=10)
+    stop_contribution_years = st.slider("🛑 SIP Stops After (Years)", min_value=0, max_value=total_years, value=5)
+    currency_code = st.selectbox("💱 Select Currency", options=["USD", "INR", "EUR", "GBP", "JPY"], index=0)
 
-    print(f"Total Amount  = {currency_symbol}{final_value:,.2f}")
-    print(f"Invested      = {currency_symbol}{total_invested:,.2f}")
-    print(f"Profit        = {currency_symbol}{profit:,.2f}")
+# Currency Symbols
+currency_symbols = {'USD': '$', 'INR': '₹', 'EUR': '€', 'GBP': '£', 'JPY': '¥'}
+currency_symbol = currency_symbols.get(currency_code, '$')
 
-    return final_value
+# Run Calculation
+if st.button("Calculate"):
+    final_value, total_invested, profit, growth_df = sip_calculator(
+        lump_sum, monthly_contribution, annual_rate, total_years, stop_contribution_years
+    )
 
-# Example Usage
-lump_sum = float(input("Enter Lump Sum Investment (e.g., 10000): "))
-monthly_contribution = float(input("Enter Monthly Contribution (e.g., 500): "))
-annual_rate = float(input("Enter Annual Interest Rate in % (e.g., 10): "))
-total_years = int(input("Enter Total Investment Period in Years (e.g., 10): "))
-stop_contribution_years = int(input("Enter Years after which SIP stops (e.g., 5): "))
-currency_code = input("Enter Currency Code (default is USD): ")
+    # Results
+    st.subheader("Results")
+    col1, col2, col3 = st.columns(3)
+    col1.metric("💰 Total Value", f"{currency_symbol}{final_value:,.2f}")
+    col2.metric("📈 Total Invested", f"{currency_symbol}{total_invested:,.2f}")
+    col3.metric("💸 Profit", f"{currency_symbol}{profit:,.2f}")
 
-future_value = sip_calculator_with_graph(
-    lump_sum,
-    monthly_contribution,
-    annual_rate,
-    total_years,
-    stop_contribution_years,
-    currency_code=currency_code
-)
-print(f"\nReturned Future Value: {future_value:,.2f}")
+    # Graph
+    st.subheader("Investment Growth Over Time")
+    fig, ax = plt.subplots(figsize=(10, 6))
+    ax.plot(growth_df["Year"], growth_df["Investment Value"], label="Investment Value", marker='o')
+    ax.set_xlabel("Years")
+    ax.set_ylabel(f"Investment Value ({currency_code})")
+    ax.set_title("Growth of Investment Over Time")
+    ax.legend()
+    ax.grid(True)
+    st.pyplot(fig)
+
+    # Data Table
+    st.subheader("Yearly Investment Details")
+    st.dataframe(growth_df)
+
+# Footer
+st.markdown("---")
+st.markdown("Developed with ❤️ using [Streamlit](https://streamlit.io)")
