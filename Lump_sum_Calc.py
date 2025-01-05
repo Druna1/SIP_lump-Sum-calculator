@@ -62,7 +62,9 @@ if st.button("📈 Calculate Investment"):
     st.markdown("### 💡 Investment Distribution")
     pie_labels = ["Invested Amount", "Profit"]
     pie_values = [total_invested, profit]
-    colors = ['#1f77b4', '#ff7f0e']  # Custom colors
+    colors = ['#4CAF50', '#FF9800']  # Professional colors
+
+    # Create the pie chart with better layout
     fig_pie, ax_pie = plt.subplots(figsize=(3, 3))  # Reduced size
     wedges, texts, autotexts = ax_pie.pie(
         pie_values, 
@@ -71,8 +73,19 @@ if st.button("📈 Calculate Investment"):
         colors=colors, 
         textprops={'fontsize': 8}
     )
-    ax_pie.legend(wedges, pie_labels, title="Legend", loc="center left", fontsize=8)
-    ax_pie.set_title("Investment Breakdown", fontsize=10)
+
+    # Move legend to the side, outside the chart
+    ax_pie.legend(
+        wedges, 
+        pie_labels, 
+        title="Legend", 
+        loc="center left", 
+        bbox_to_anchor=(1, 0, 0.5, 1),  # Position outside the chart
+        fontsize=8
+    )
+
+    # Add padding and a better title
+    ax_pie.set_title("Investment Breakdown", fontsize=10, pad=20)
     st.pyplot(fig_pie)
 
     # Growth Chart
