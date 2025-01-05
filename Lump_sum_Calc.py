@@ -55,7 +55,16 @@ if st.button("Calculate"):
     col2.metric("📈 Total Invested", f"{currency_symbol}{total_invested:,.2f}")
     col3.metric("💸 Profit", f"{currency_symbol}{profit:,.2f}")
 
-    # Graphs
+    # Pie Chart for Summary
+    st.subheader("Investment Summary")
+    pie_labels = ["Invested Amount", "Profit"]
+    pie_values = [total_invested, profit]
+    fig_pie, ax_pie = plt.subplots()
+    ax_pie.pie(pie_values, labels=pie_labels, autopct='%1.1f%%', startangle=90)
+    ax_pie.set_title("Investment Distribution")
+    st.pyplot(fig_pie)
+
+    # Growth Chart
     st.subheader("Growth Over Time")
     fig, ax = plt.subplots(figsize=(10, 6))
     ax.plot(sip_growth["Year"], sip_growth["Investment Value"], label="SIP + Lump Sum Growth", marker='x')
