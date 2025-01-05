@@ -64,7 +64,6 @@ if st.button("📈 Calculate Investment"):
     pie_values = [total_invested, profit]
     colors = ['#4CAF50', '#FF9800']  # Professional colors
 
-    # Create the pie chart with better layout
     fig_pie, ax_pie = plt.subplots(figsize=(3, 3))  # Reduced size
     wedges, texts, autotexts = ax_pie.pie(
         pie_values, 
@@ -73,24 +72,20 @@ if st.button("📈 Calculate Investment"):
         colors=colors, 
         textprops={'fontsize': 8}
     )
-
-    # Move legend to the side, outside the chart
     ax_pie.legend(
         wedges, 
         pie_labels, 
         title="Legend", 
         loc="center left", 
-        bbox_to_anchor=(1, 0, 0.5, 1),  # Position outside the chart
+        bbox_to_anchor=(1, 0, 0.5, 1), 
         fontsize=8
     )
-
-    # Add padding and a better title
     ax_pie.set_title("Investment Breakdown", fontsize=10, pad=20)
     st.pyplot(fig_pie)
 
     # Growth Chart
     st.markdown("### 📈 Growth Over Time")
-    fig, ax = plt.subplots(figsize=(6, 4))  # Reduced size
+    fig, ax = plt.subplots(figsize=(6, 4))
     ax.plot(sip_growth["Year"], sip_growth["Investment Value"], label="Investment Value", marker='o', color="#2ca02c")
     ax.set_xlabel("Years", fontsize=10)
     ax.set_ylabel(f"Value ({currency_code})", fontsize=10)
@@ -99,10 +94,22 @@ if st.button("📈 Calculate Investment"):
     ax.legend(fontsize=8)
     st.pyplot(fig)
 
-    # Data Table
+    # Add Columns for Invested Amount, Profit, and Total Value
+    sip_growth["Invested Amount"] = sip_growth["Year"] * monthly_contribution * 12 + lump_sum
+    sip_growth["Profit"] = sip_growth["Investment Value"] - sip_growth["Invested Amount"]
+    sip_growth["Total Value"] = sip_growth["Investment Value"]
+
+    # Display the table
     st.subheader("📅 Yearly Investment Details")
     st.dataframe(
-        sip_growth.style.format({"Investment Value": lambda x: f"{currency_symbol}{x:,.2f}"})
+        sip_growth[["Year", "Invested Amount", "Profit", "Total Value"]].style.format(
+            {
+                "Year": "{:.0f}",
+                "Invested Amount": lambda x: f"{currency_symbol}{x:,.2f}",
+                "Profit": lambda x: f"{currency_symbol}{x:,.2f}",
+                "Total Value": lambda x: f"{currency_symbol}{x:,.2f}",
+            }
+        )
     )
 
 # Footer
