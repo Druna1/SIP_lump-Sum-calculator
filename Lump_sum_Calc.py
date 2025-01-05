@@ -57,37 +57,34 @@ if st.button("📈 Calculate Investment"):
 
     # Visualizations
     st.subheader("📊 Visualizations")
-    col1, col2 = st.columns(2)
 
     # Pie Chart
-    with col1:
-        st.markdown("### 💡 Investment Distribution")
-        pie_labels = ["Invested Amount", "Profit"]
-        pie_values = [total_invested, profit]
-        colors = ['#1f77b4', '#ff7f0e']  # Custom colors
-        fig_pie, ax_pie = plt.subplots(figsize=(3, 3))  # Slightly larger size
-        wedges, texts, autotexts = ax_pie.pie(
-            pie_values, 
-            autopct='%1.1f%%', 
-            startangle=90, 
-            colors=colors, 
-            textprops={'fontsize': 8}
-        )
-        ax_pie.legend(wedges, pie_labels, title="Legend", loc="center left", fontsize=8)
-        ax_pie.set_title("Investment Breakdown", fontsize=10)
-        st.pyplot(fig_pie)
+    st.markdown("### 💡 Investment Distribution")
+    pie_labels = ["Invested Amount", "Profit"]
+    pie_values = [total_invested, profit]
+    colors = ['#1f77b4', '#ff7f0e']  # Custom colors
+    fig_pie, ax_pie = plt.subplots(figsize=(4, 4))  # Slightly larger size
+    wedges, texts, autotexts = ax_pie.pie(
+        pie_values, 
+        autopct='%1.1f%%', 
+        startangle=90, 
+        colors=colors, 
+        textprops={'fontsize': 8}
+    )
+    ax_pie.legend(wedges, pie_labels, title="Legend", loc="center left", fontsize=8)
+    ax_pie.set_title("Investment Breakdown", fontsize=10)
+    st.pyplot(fig_pie)
 
     # Growth Chart
-    with col2:
-        st.markdown("### 📈 Growth Over Time")
-        fig, ax = plt.subplots(figsize=(6, 4))
-        ax.plot(sip_growth["Year"], sip_growth["Investment Value"], label="Investment Value", marker='o', color="#2ca02c")
-        ax.set_xlabel("Years", fontsize=10)
-        ax.set_ylabel(f"Value ({currency_code})", fontsize=10)
-        ax.set_title("Investment Growth", fontsize=12)
-        ax.grid(True, linestyle='--', alpha=0.7)
-        ax.legend(fontsize=8)
-        st.pyplot(fig)
+    st.markdown("### 📈 Growth Over Time")
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.plot(sip_growth["Year"], sip_growth["Investment Value"], label="Investment Value", marker='o', color="#2ca02c")
+    ax.set_xlabel("Years", fontsize=10)
+    ax.set_ylabel(f"Value ({currency_code})", fontsize=10)
+    ax.set_title("Investment Growth", fontsize=12)
+    ax.grid(True, linestyle='--', alpha=0.7)
+    ax.legend(fontsize=8)
+    st.pyplot(fig)
 
     # Data Table
     st.subheader("📅 Yearly Investment Details")
