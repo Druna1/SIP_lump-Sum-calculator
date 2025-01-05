@@ -59,7 +59,7 @@ if st.button("Calculate"):
     st.subheader("Investment Summary")
     pie_labels = ["Invested Amount", "Profit"]
     pie_values = [total_invested, profit]
-    fig_pie, ax_pie = plt.subplots(figsize=(5, 5))  # Reduced size
+    fig_pie, ax_pie = plt.subplots(figsize=(2, 2))  # Reduced size
     ax_pie.pie(pie_values, labels=pie_labels, autopct='%1.1f%%', startangle=90)
     ax_pie.set_title("Investment Distribution")
     st.pyplot(fig_pie)
