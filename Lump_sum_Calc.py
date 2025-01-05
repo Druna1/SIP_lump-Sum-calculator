@@ -2,7 +2,34 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
+import locale
 
+# Function to set locale based on currency code
+def set_locale(currency_code):
+    try:
+        if currency_code == "INR":
+            locale.setlocale(locale.LC_ALL, 'en_IN')  # Set locale for India
+        elif currency_code == "USD":
+            locale.setlocale(locale.LC_ALL, 'en_US')  # Set locale for US
+        elif currency_code == "EUR":
+            locale.setlocale(locale.LC_ALL, 'en_IE')  # Set locale for Europe
+        elif currency_code == "GBP":
+            locale.setlocale(locale.LC_ALL, 'en_GB')  # Set locale for UK
+        elif currency_code == "JPY":
+            locale.setlocale(locale.LC_ALL, 'ja_JP')  # Set locale for Japan
+        else:
+            locale.setlocale(locale.LC_ALL, '')  # Default locale
+    except locale.Error:
+        st.warning("Locale setting not supported on your system. Default formatting will be used.")
+
+# Function to format numbers with commas and currency symbols
+def format_currency(value, currency_symbol):
+    try:
+        return f"{currency_symbol}{locale.format_string('%.2f', value, grouping=True)}"
+    except ValueError:
+        return f"{currency_symbol}{value:,.2f}"  # Fallback to default formatting
+
+# Main SIP Calculator function
 def sip_calculator_with_lump_sum(lump_sum, monthly_contribution, annual_rate, total_years, stop_contribution_years):
     r = annual_rate / 100
     n = 12
@@ -42,6 +69,9 @@ with st.sidebar:
 currency_symbols = {'USD': '$', 'INR': '₹', 'EUR': '€', 'GBP': '£', 'JPY': '¥'}
 currency_symbol = currency_symbols.get(currency_code, '$')
 
+# Set locale based on selected currency
+set_locale(currency_code)
+
 # Run Calculation
 if st.button("📈 Calculate Investment"):
     # Combined SIP and Lump Sum Calculation
@@ -52,20 +82,37 @@ if st.button("📈 Calculate Investment"):
     # Results
     st.subheader("📋 Results Summary")
     col1, col2, col3 = st.columns(3)
-    col1.metric("💰 Total Value", f"{currency_symbol}{final_value:,.2f}")
-    col2.metric("📈 Total Invested", f"{currency_symbol}{total_invested:,.2f}")
-    col3.metric("💸 Profit", f"{currency_symbol}{profit:,.2f}")
+    col1.metric("💰 Total Value", format_currency(final_value, currency_symbol))
+    col2.metric("📈 Total Invested", format_currency(total_invested, currency_symbol))
+    col3.metric("💸 Profit", format_currency(profit, currency_symbol))
 
-    # Visualizations
-    st.subheader("📊 Visualizations")
+    # Add Columns for Invested Amount, Profit, Total Value, and Profit %
+    sip_growth["Invested Amount"] = sip_growth["Year"] * monthly_contribution * 12 + lump_sum
+    sip_growth["Profit"] = sip_growth["Investment Value"] - sip_growth["Invested Amount"]
+    sip_growth["Total Value"] = sip_growth["Investment Value"]
+    sip_growth["Profit %"] = (sip_growth["Profit"] / sip_growth["Invested Amount"]) * 100
+
+    # Display the table
+    st.subheader("📅 Yearly Investment Details")
+    st.dataframe(
+        sip_growth[["Year", "Invested Amount", "Profit", "Total Value", "Profit %"]].style.format(
+            {
+                "Year": "{:.0f}",
+                "Invested Amount": lambda x: format_currency(x, currency_symbol),
+                "Profit": lambda x: format_currency(x, currency_symbol),
+                "Total Value": lambda x: format_currency(x, currency_symbol),
+                "Profit %": "{:.2f}%",
+            }
+        )
+    )
 
     # Pie Chart
     st.markdown("### 💡 Investment Distribution")
     pie_labels = ["Invested Amount", "Profit"]
     pie_values = [total_invested, profit]
-    colors = ['#4CAF50', '#FF9800']  # Professional colors
+    colors = ['#4CAF50', '#FF9800']
 
-    fig_pie, ax_pie = plt.subplots(figsize=(2.5, 2.5))  # Further reduced size
+    fig_pie, ax_pie = plt.subplots(figsize=(2.5, 2.5))
     wedges, texts, autotexts = ax_pie.pie(
         pie_values, 
         autopct='%1.1f%%', 
@@ -86,40 +133,15 @@ if st.button("📈 Calculate Investment"):
 
     # Growth Chart
     st.markdown("### 📈 Growth Over Time")
-    fig, ax = plt.subplots(figsize=(4, 2.5))  # Further reduced graph size
-
-    # Plot the investment growth
+    fig, ax = plt.subplots(figsize=(4, 2.5))
     ax.plot(sip_growth["Year"], sip_growth["Investment Value"], label="Investment Value", marker='o', color="#2ca02c")
-
-    # Format Y-axis with currency symbols
-    ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{currency_symbol}{x:,.0f}"))
-
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: format_currency(x, currency_symbol)))
     ax.set_xlabel("Years", fontsize=8)
     ax.set_ylabel(f"Value ({currency_code})", fontsize=8)
     ax.set_title("Investment Growth", fontsize=10)
     ax.grid(True, linestyle='--', alpha=0.7)
     ax.legend(fontsize=8)
     st.pyplot(fig)
-
-    # Add Columns for Invested Amount, Profit, Total Value, and Profit %
-    sip_growth["Invested Amount"] = sip_growth["Year"] * monthly_contribution * 12 + lump_sum
-    sip_growth["Profit"] = sip_growth["Investment Value"] - sip_growth["Invested Amount"]
-    sip_growth["Total Value"] = sip_growth["Investment Value"]
-    sip_growth["Profit %"] = (sip_growth["Profit"] / sip_growth["Invested Amount"]) * 100
-
-    # Display the table
-    st.subheader("📅 Yearly Investment Details")
-    st.dataframe(
-        sip_growth[["Year", "Invested Amount", "Profit", "Total Value", "Profit %"]].style.format(
-            {
-                "Year": "{:.0f}",
-                "Invested Amount": lambda x: f"{currency_symbol}{x:,.2f}",
-                "Profit": lambda x: f"{currency_symbol}{x:,.2f}",
-                "Total Value": lambda x: f"{currency_symbol}{x:,.2f}",
-                "Profit %": "{:.2f}%",
-            }
-        )
-    )
 
 # Footer
 st.markdown("---")
