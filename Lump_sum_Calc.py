@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Function to calculate SIP and Lump Sum investment
 def sip_calculator_with_lump_sum(lump_sum, monthly_contribution, annual_rate, total_years, stop_contribution_years):
     r = annual_rate / 100
     n = 12
@@ -92,7 +91,9 @@ if st.button("📈 Calculate Investment"):
 
     # Data Table
     st.subheader("📅 Yearly Investment Details")
-    st.dataframe(sip_growth.style.format({"Investment Value": f"{currency_symbol} {:,.2f}"}))
+    st.dataframe(
+        sip_growth.style.format({"Investment Value": lambda x: f"{currency_symbol}{x:,.2f}"})
+    )
 
 # Footer
 st.markdown("---")
