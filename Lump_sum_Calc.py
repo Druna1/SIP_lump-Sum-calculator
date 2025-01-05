@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# Function to calculate SIP and Lump Sum investment
 def sip_calculator_with_lump_sum(lump_sum, monthly_contribution, annual_rate, total_years, stop_contribution_years):
     r = annual_rate / 100
     n = 12
@@ -25,11 +26,11 @@ def sip_calculator_with_lump_sum(lump_sum, monthly_contribution, annual_rate, to
 
 # Streamlit App
 st.set_page_config(page_title="Enhanced SIP & Lump Sum Calculator", layout="wide")
-st.title("📈 Enhanced SIP & Lump Sum Investment Calculator")
+st.title("📊 SIP & Lump Sum Investment Calculator")
 
 # Sidebar Inputs
 with st.sidebar:
-    st.header("Input Parameters")
+    st.header("🎯 Input Parameters")
     lump_sum = st.number_input("💵 Lump Sum Investment", value=10000.0, min_value=0.0, max_value=1_000_000_000.0, step=1000.0)
     monthly_contribution = st.number_input("📅 Monthly Contribution", value=500.0, min_value=0.0, max_value=10_000_000.0, step=100.0)
     annual_rate = st.slider("📊 Annual Interest Rate (%)", min_value=0.0, max_value=50.0, value=10.0, step=0.1)
@@ -42,55 +43,56 @@ currency_symbols = {'USD': '$', 'INR': '₹', 'EUR': '€', 'GBP': '£', 'JPY': 
 currency_symbol = currency_symbols.get(currency_code, '$')
 
 # Run Calculation
-if st.button("Calculate"):
+if st.button("📈 Calculate Investment"):
     # Combined SIP and Lump Sum Calculation
     final_value, total_invested, profit, sip_growth = sip_calculator_with_lump_sum(
         lump_sum, monthly_contribution, annual_rate, total_years, stop_contribution_years
     )
 
     # Results
-    st.subheader("Results")
+    st.subheader("📋 Results Summary")
     col1, col2, col3 = st.columns(3)
     col1.metric("💰 Total Value", f"{currency_symbol}{final_value:,.2f}")
     col2.metric("📈 Total Invested", f"{currency_symbol}{total_invested:,.2f}")
     col3.metric("💸 Profit", f"{currency_symbol}{profit:,.2f}")
 
-    # Pie Chart for Summary
-    st.subheader("Investment Summary")
-    pie_labels = ["Invested Amount", "Profit"]
-    pie_values = [total_invested, profit]
-    
-    # Create the pie chart with smaller labels and a legend
-    fig_pie, ax_pie = plt.subplots(figsize=(1.5, 1.5))  # Reduced size
-    wedges, texts, autotexts = ax_pie.pie(
-        pie_values, 
-        labels=pie_labels, 
-        autopct='%1.1f%%', 
-        startangle=90, 
-        textprops={'fontsize': 6}  # Smaller font size for labels
-    )
-    
-    # Set smaller font sizes for the percentage labels
-    for autotext in autotexts:
-        autotext.set_fontsize(6)
-        
-    ax_pie.set_title("Investment Distribution", fontsize=8)  # Adjust title font size
-    st.pyplot(fig_pie)
+    # Visualizations
+    st.subheader("📊 Visualizations")
+    col1, col2 = st.columns(2)
+
+    # Pie Chart
+    with col1:
+        st.markdown("### 💡 Investment Distribution")
+        pie_labels = ["Invested Amount", "Profit"]
+        pie_values = [total_invested, profit]
+        colors = ['#1f77b4', '#ff7f0e']  # Custom colors
+        fig_pie, ax_pie = plt.subplots(figsize=(3, 3))  # Slightly larger size
+        wedges, texts, autotexts = ax_pie.pie(
+            pie_values, 
+            autopct='%1.1f%%', 
+            startangle=90, 
+            colors=colors, 
+            textprops={'fontsize': 8}
+        )
+        ax_pie.legend(wedges, pie_labels, title="Legend", loc="center left", fontsize=8)
+        ax_pie.set_title("Investment Breakdown", fontsize=10)
+        st.pyplot(fig_pie)
 
     # Growth Chart
-    st.subheader("Growth Over Time")
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.plot(sip_growth["Year"], sip_growth["Investment Value"], label="SIP + Lump Sum Growth", marker='x')
-    ax.set_xlabel("Years")
-    ax.set_ylabel(f"Value ({currency_code})")
-    ax.set_title("Investment Growth")
-    ax.legend()
-    ax.grid(True)
-    st.pyplot(fig)
+    with col2:
+        st.markdown("### 📈 Growth Over Time")
+        fig, ax = plt.subplots(figsize=(6, 4))
+        ax.plot(sip_growth["Year"], sip_growth["Investment Value"], label="Investment Value", marker='o', color="#2ca02c")
+        ax.set_xlabel("Years", fontsize=10)
+        ax.set_ylabel(f"Value ({currency_code})", fontsize=10)
+        ax.set_title("Investment Growth", fontsize=12)
+        ax.grid(True, linestyle='--', alpha=0.7)
+        ax.legend(fontsize=8)
+        st.pyplot(fig)
 
-    # Data Tables
-    st.subheader("Yearly Investment Details")
-    st.dataframe(sip_growth)
+    # Data Table
+    st.subheader("📅 Yearly Investment Details")
+    st.dataframe(sip_growth.style.format({"Investment Value": f"{currency_symbol} {:,.2f}"}))
 
 # Footer
 st.markdown("---")
