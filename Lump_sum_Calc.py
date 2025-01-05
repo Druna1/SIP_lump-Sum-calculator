@@ -59,9 +59,22 @@ if st.button("Calculate"):
     st.subheader("Investment Summary")
     pie_labels = ["Invested Amount", "Profit"]
     pie_values = [total_invested, profit]
+    
+    # Create the pie chart with smaller labels and a legend
     fig_pie, ax_pie = plt.subplots(figsize=(1.5, 1.5))  # Reduced size
-    ax_pie.pie(pie_values, labels=pie_labels, autopct='%1.1f%%', startangle=90)
-    ax_pie.set_title("Investment Distribution", fontsize=10)  # Adjust title font size for small chart
+    wedges, texts, autotexts = ax_pie.pie(
+        pie_values, 
+        labels=pie_labels, 
+        autopct='%1.1f%%', 
+        startangle=90, 
+        textprops={'fontsize': 6}  # Smaller font size for labels
+    )
+    
+    # Set smaller font sizes for the percentage labels
+    for autotext in autotexts:
+        autotext.set_fontsize(6)
+        
+    ax_pie.set_title("Investment Distribution", fontsize=8)  # Adjust title font size
     st.pyplot(fig_pie)
 
     # Growth Chart
