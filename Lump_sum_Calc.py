@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
 
 def sip_calculator_with_lump_sum(lump_sum, monthly_contribution, annual_rate, total_years, stop_contribution_years):
     r = annual_rate / 100
@@ -64,7 +65,7 @@ if st.button("📈 Calculate Investment"):
     pie_values = [total_invested, profit]
     colors = ['#4CAF50', '#FF9800']  # Professional colors
 
-    fig_pie, ax_pie = plt.subplots(figsize=(3, 3))  # Reduced size
+    fig_pie, ax_pie = plt.subplots(figsize=(2.5, 2.5))  # Further reduced size
     wedges, texts, autotexts = ax_pie.pie(
         pie_values, 
         autopct='%1.1f%%', 
@@ -85,11 +86,17 @@ if st.button("📈 Calculate Investment"):
 
     # Growth Chart
     st.markdown("### 📈 Growth Over Time")
-    fig, ax = plt.subplots(figsize=(5, 3))  # Reduced graph size
+    fig, ax = plt.subplots(figsize=(4, 2.5))  # Further reduced graph size
+
+    # Plot the investment growth
     ax.plot(sip_growth["Year"], sip_growth["Investment Value"], label="Investment Value", marker='o', color="#2ca02c")
-    ax.set_xlabel("Years", fontsize=10)
-    ax.set_ylabel(f"Value ({currency_code})", fontsize=10)
-    ax.set_title("Investment Growth", fontsize=12)
+
+    # Format Y-axis with currency symbols
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda x, _: f"{currency_symbol}{x:,.0f}"))
+
+    ax.set_xlabel("Years", fontsize=8)
+    ax.set_ylabel(f"Value ({currency_code})", fontsize=8)
+    ax.set_title("Investment Growth", fontsize=10)
     ax.grid(True, linestyle='--', alpha=0.7)
     ax.legend(fontsize=8)
     st.pyplot(fig)
