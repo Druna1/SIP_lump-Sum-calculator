@@ -85,7 +85,7 @@ if st.button("📈 Calculate Investment"):
 
     # Growth Chart
     st.markdown("### 📈 Growth Over Time")
-    fig, ax = plt.subplots(figsize=(6, 4))
+    fig, ax = plt.subplots(figsize=(5, 3))  # Reduced graph size
     ax.plot(sip_growth["Year"], sip_growth["Investment Value"], label="Investment Value", marker='o', color="#2ca02c")
     ax.set_xlabel("Years", fontsize=10)
     ax.set_ylabel(f"Value ({currency_code})", fontsize=10)
@@ -94,20 +94,22 @@ if st.button("📈 Calculate Investment"):
     ax.legend(fontsize=8)
     st.pyplot(fig)
 
-    # Add Columns for Invested Amount, Profit, and Total Value
+    # Add Columns for Invested Amount, Profit, Total Value, and Profit %
     sip_growth["Invested Amount"] = sip_growth["Year"] * monthly_contribution * 12 + lump_sum
     sip_growth["Profit"] = sip_growth["Investment Value"] - sip_growth["Invested Amount"]
     sip_growth["Total Value"] = sip_growth["Investment Value"]
+    sip_growth["Profit %"] = (sip_growth["Profit"] / sip_growth["Invested Amount"]) * 100
 
     # Display the table
     st.subheader("📅 Yearly Investment Details")
     st.dataframe(
-        sip_growth[["Year", "Invested Amount", "Profit", "Total Value"]].style.format(
+        sip_growth[["Year", "Invested Amount", "Profit", "Total Value", "Profit %"]].style.format(
             {
                 "Year": "{:.0f}",
                 "Invested Amount": lambda x: f"{currency_symbol}{x:,.2f}",
                 "Profit": lambda x: f"{currency_symbol}{x:,.2f}",
                 "Total Value": lambda x: f"{currency_symbol}{x:,.2f}",
+                "Profit %": "{:.2f}%",
             }
         )
     )
