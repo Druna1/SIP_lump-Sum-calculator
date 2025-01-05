@@ -63,7 +63,7 @@ if st.button("📈 Calculate Investment"):
     pie_labels = ["Invested Amount", "Profit"]
     pie_values = [total_invested, profit]
     colors = ['#1f77b4', '#ff7f0e']  # Custom colors
-    fig_pie, ax_pie = plt.subplots(figsize=(4, 4))  # Slightly larger size
+    fig_pie, ax_pie = plt.subplots(figsize=(3, 3))  # Reduced size
     wedges, texts, autotexts = ax_pie.pie(
         pie_values, 
         autopct='%1.1f%%', 
@@ -77,7 +77,7 @@ if st.button("📈 Calculate Investment"):
 
     # Growth Chart
     st.markdown("### 📈 Growth Over Time")
-    fig, ax = plt.subplots(figsize=(8, 5))
+    fig, ax = plt.subplots(figsize=(6, 4))  # Reduced size
     ax.plot(sip_growth["Year"], sip_growth["Investment Value"], label="Investment Value", marker='o', color="#2ca02c")
     ax.set_xlabel("Years", fontsize=10)
     ax.set_ylabel(f"Value ({currency_code})", fontsize=10)
